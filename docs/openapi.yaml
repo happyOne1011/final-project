@@ -8,7 +8,7 @@ info:
 servers:
   - url: http://localhost:3000/api
     description: Local Development Server
-  - url: https://final-project-service-1cqm.onrender.com
+  - url: https://final-project-service-1cqm.onrender.com/api
     description: Prodcution Server
 
 tags:
@@ -547,7 +547,23 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-
+  /health:
+    get:
+      summary: Health Check
+      description: Returns the current status of the API. Used by Render to verify that the service is running.
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: API is running successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
 components:
   schemas:
     AuthCredentials:
