@@ -9,7 +9,7 @@ servers:
   - url: http://localhost:3000/api
     description: Local Development Server
   - url: https://final-project-service-1cqm.onrender.com
-    description: Prodcution Development Server
+    description: Prodcution Server
 
 tags:
   - name: Auth
