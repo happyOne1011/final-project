@@ -2,10 +2,18 @@ import bcrypt from 'bcrypt';
 import 'dotenv/config';
 import prisma from '../src/config/db.js';
 
+const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
 try {
+  if (isDev) {
+    await prisma.$queryRaw`TRUNCATE TABLE "OrderItem", "Order", "Product", "Category", "User" RESTART IDENTITY CASCADE;`;
+    console.log('Development: e-commerce table truncated.');
+  }
   // 1. Clear out all tables related to the E-commerce app
-  await prisma.$queryRaw`TRUNCATE TABLE "OrderItem", "Order", "Product", "Category", "User" RESTART IDENTITY CASCADE;`;
+  
 
+  const count = await prisma.user.count();
+
+  if (count === 0) {
   // 2. Create 5 Users
   const usersData = [
     { email: 'alice@test.com', password: 'password123' },
@@ -79,9 +87,13 @@ try {
   }
   console.log(`Created 5 Orders (1 per user)`);
 
-  console.log('All Seed data completed successfully!');
+  console.log('All Seed data completed successfully!');}
+  else{
+    console.log('Database already contains data. Skipping seed.');
+  }
 } catch (error) {
   console.error('Seed failed:', error);
+  process.exit(1);
 } finally {
   await prisma.$disconnect();
 }
