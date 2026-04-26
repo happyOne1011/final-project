@@ -1,14 +1,18 @@
 {
-  "name": "final-project-template",
+  "name": "final-project",
   "version": "1.0.0",
-  "description": "This repository provides the **folder structure** for your team’s final project. All implementation is left to students.",
+  "description": "Managing a digital storefront, including users, products, categories, and orders.",
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "node --env-file=.env --watch src/server.js",
-     "seed": "node prisma/seed.js"
+    "start": "node src/server.js",
+    "migrate:dev": "npx prisma migrate dev",
+    "migrate:deploy": "npx prisma migrate deploy",
+    "seed:dev": "node --env-file=.env prisma/seed.js",
+    "seed:prod": "node prisma/seed.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -99,5 +103,11 @@
     "word-wrap": "^1.2.5",
     "yocto-queue": "^0.1.0"
   },
-  "keywords": []
+  "keywords": [
+    "node",
+    "express",
+    "prisma",
+    "postgres",
+    "api",
+    "tasks"]
 }

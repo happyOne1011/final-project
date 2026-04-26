@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
-
+import cors from 'cors';
 import yaml from 'js-yaml';
 import fs from 'fs';
 import productsRoutes from './routes/productsRoutes.js'
@@ -13,7 +13,7 @@ import orderRoutes from './routes/orderRoutes.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+app.use(cors());
 let specs;
 try
 {
