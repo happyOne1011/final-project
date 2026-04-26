@@ -1,0 +1,814 @@
+openapi: 3.0.3
+
+info:
+  title: E-Commerce API
+  version: 1.0.0
+  description: API documentation for managing a digital storefront, including users, products, categories, and orders.
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local Development Server
+
+tags:
+  - name: Auth
+    description: User authentication and registration
+  - name: Products
+    description: Operations related to products
+  - name: Categories
+    description: Operations related to product categories
+  - name: Orders
+    description: Operations related to customer orders
+
+paths: 
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate user 
+      description: Authenticate a user and return an access token
+      requestBody:
+        description: User login credentials 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthCredentials'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                example: 
+                  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          $ref: '#/components/responses/InvalidUserInput'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example: 
+                  error: 'Invalid credentials'
+
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Register user 
+      description: Create a new user account 
+      requestBody:
+        description: User signup credentials 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthCredentials'
+      responses:
+        '201':
+          description: Signed up successfully 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/InvalidUserInput'
+        '409':
+          description: Duplicate Email 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example: 
+                  error: 'Email has already been used'
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      description: Retrieve a list of all products in the store
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product' 
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Products
+      summary: Create a new product (Admin Only)
+      description: Add a new product to the storefront.
+      requestBody:
+        description: The product object to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Product successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/InvalidProductInput'  
+        '401':   
+          $ref: '#/components/responses/Unauthorized'         
+        '403':   
+          $ref: '#/components/responses/Forbidden'         
+
+  /products/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Products
+      summary: Get a product by ID
+      description: Retrieve full details of a specific product
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: A single product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Products
+      summary: Update a product by ID (Admin Only)
+      description: Update a single product by its ID
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        description: Fields to update for the product. All fields are optional.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated successfully 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Products
+      summary: Delete a product by ID (Admin Only)
+      description: Permanently remove a product
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '204':
+          description: Product deleted successfully 
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories
+      responses:
+        '200':
+          description: A list of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category' 
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Create a new category (Admin Only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Electronics
+      responses:
+        '201':
+          description: Category successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/InvalidCategoryInput'  
+        '401':   
+          $ref: '#/components/responses/Unauthorized'         
+        '403':   
+          $ref: '#/components/responses/Forbidden' 
+        '409':
+          description: Duplicate Category Name 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example: 
+                  error: ' Category Name already exists'
+
+  /categories/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Get a category by ID
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: A single category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryIdResponse'
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Update a category by ID (Admin Only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Computers & Electronics
+      responses:
+        '200':
+          description: Category updated successfully 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Bad Request due to Invalid ID or Invalid Input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example: 
+                  errors: 
+                    - 'Category Name is required'
+                    - 'ID is not a positive integer'
+                
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Duplicate Category Name 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                example: 
+                  error: ' Category Name already exists'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      summary: Delete a category by ID (Admin Only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '204':
+          description: Category deleted successfully 
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Orders
+      summary: Get all orders (Admin sees all, Users see own)
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 50
+                  userId:
+                    type: integer
+                    example: 1
+                  totalAmount:
+                    type: number
+                    format: float
+                    example: 51.98
+                  status:
+                    type: string
+                    example: "Pending"
+                  createdAt:
+                    type: string
+                    example: "2023-10-27T14:32:00Z" 
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Orders
+      summary: Place a new order
+      requestBody:
+        description: Array of items to purchase
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '201':
+          description: Order successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 50
+                  userId:
+                    type: integer
+                    example: 1
+                  totalAmount:
+                    type: number
+                    format: float
+                    example: 51.98
+                  status:
+                    type: string
+                    example: "Pending"
+                  createdAt:
+                    type: string
+                    example: "2023-10-27T14:32:00Z"
+        '400':
+          $ref: '#/components/responses/InvalidOrderInput'  
+        '401':   
+          $ref: '#/components/responses/Unauthorized'         
+        '404':   
+          $ref: '#/components/responses/NotFound'         
+
+  /orders/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Orders
+      summary: Get an order receipt by ID (Owner/Admin Only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: A detailed order receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '401':   
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Orders
+      summary: Update order status (Admin Only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: 
+                  - pending
+                  - in-progress
+                  - completed
+      responses:
+        '200':
+          description: Order updated successfully 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 50
+                  userId:
+                    type: integer
+                    example: 1
+                  totalAmount:
+                    type: number
+                    format: float
+                    example: 51.98
+                  status:
+                    type: string
+                    example: "Pending"
+                  createdAt:
+                    type: string
+                    example: "2023-10-27T14:32:00Z"
+        '400':
+          description: Bad request due to invalid data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                 error:
+                  type: string
+                  example: 
+                    error: 'status is required'
+          $ref: '#/components/responses/InvalidId'            
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Orders
+      summary: Cancel an order by ID (Owner/Admin Only)
+      parameters:
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '204':
+          description: Order canceled successfully 
+        '400':
+          $ref: '#/components/responses/InvalidId'
+        '401':   
+          $ref: '#/components/responses/Unauthorized'  
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    AuthCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      example: 
+        email: "user@example.com"
+        password: "Password123!"
+        
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role: 
+          type: string
+      example: 
+        id: 1
+        email: "customer@example.com"
+        role: "USER"
+
+    ProductInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Wireless Mouse"
+        price:
+          type: number
+          format: float
+          example: 25.99
+        stock:
+          type: integer
+          example: 50
+        categoryId:
+          type: integer
+          example: 1
+
+    Product:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              readOnly: true
+              example: 10
+        - $ref: '#/components/schemas/ProductInput'
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Electronics
+    CategoryIdResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Electronics
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: Gaming Laptop
+              price:
+                type: number
+                format: float
+                example: 12.00
+    OrderInput:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+                example: 10
+              quantity:
+                type: integer
+                example: 2
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 50
+        userId:
+          type: integer
+          example: 1
+        totalAmount:
+          type: number
+          format: float
+          example: 51.98
+        status:
+          type: string
+          example: "Pending"
+        createdAt:
+          type: string
+          example: "2023-10-27T14:32:00Z"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 105
+              productId:
+                type: integer
+                example: 10
+              productName:
+                type: string
+                example: "Wireless Mouse"
+              quantity:
+                type: integer
+                example: 2
+              price:
+                type: number
+                format: float
+                example: 25.99
+
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      description: The ID of the resource
+      schema:
+        type: integer
+      example: 1
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            example: 
+              error: 'Resource 1 not found'
+
+    InvalidId:
+      description: Invalid ID format
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+            example: 
+              errors: ['ID is not a positive integer']
+
+    InvalidProductInput:
+      description: Bad request due to invalid data or invalid id
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+            example: 
+              errors: 
+                - 'name is required'
+                - 'Price must be a decimal'
+                - 'stock and/OR categoryId must be a positive integer'
+    InvalidCategoryInput:
+      description: Bad request due to invalid data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            example: 
+              error: 'Category Name is required'
+    InvalidOrderInput:
+      description: Bad request due to invalid data or invalid id
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+            example: 
+              errors: 
+                - 'productId must be a positive integer'
+                - 'quantity must be a positive integer'
+                - 'productId is required' 
+                - 'quantity is required'        
+    Unauthorized:
+      description: Client is not authenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            example: 
+              error: 'Not authenticated. Please provide a valid token.'  
+    InvalidUserInput:
+      description: Bad request due to invalid data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: string
+            example: 
+              errors: 
+                - 'Email is required'
+                - 'Password is required'
+    Forbidden:
+      description: Client is not authorized 
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            example: 
+              error: 'Forbidden: insufficient permission.'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
