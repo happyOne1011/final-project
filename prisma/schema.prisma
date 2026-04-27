@@ -37,7 +37,7 @@ model Product {
   price       Float     
   stock       Int
   categoryId  Int
-  category    Category    @relation(fields: [categoryId], references: [id])
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
 }
 
@@ -57,5 +57,5 @@ model OrderItem {
   productId Int
   quantity  Int     @default(1)
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

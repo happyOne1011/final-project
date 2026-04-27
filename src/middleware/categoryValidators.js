@@ -40,7 +40,7 @@ body('name')
     .trim()
     .escape()
     .isLength({min: 3})
-    .withMessage('Name must be at least 3 characters')
+    .withMessage('Category Name must be at least 3 characters')
     .bail(),
     
 
