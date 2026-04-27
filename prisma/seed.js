@@ -55,7 +55,7 @@ try {
   await prisma.product.createMany({
     data: [
       { name: 'Gaming Laptop', price: 1200.00, stock: 15, categoryId: categories[0].id },
-      { name: 'Wireless Mouse', price: 25.99, stock: 50, categoryId: categories[0].id },  
+      { name: 'Wireless Earphones', price: 25.99, stock: 50, categoryId: categories[0].id },  
       { name: 'Graphic T-Shirt', price: 18.50, stock: 100, categoryId: categories[1].id },
       { name: 'JavaScript Cookbook', price: 35.00, stock: 40, categoryId: categories[2].id },
       { name: 'Coffee Maker', price: 85.00, stock: 20, categoryId: categories[3].id },    
@@ -68,7 +68,7 @@ try {
 
   // 5. Create 5 Orders (One for each user)
   const laptop = products.find(p => p.name === 'Gaming Laptop');
-  const mouse = products.find(p => p.name === 'Wireless Mouse');
+  const Earphones = products.find(p => p.name === 'Wireless Earphones');
 
   let orderCount = 0; // Added a counter to track the actual number created
 
@@ -81,12 +81,12 @@ try {
       await prisma.order.create({
         data: {
           userId: user.id,
-          totalAmount: Number(laptop.price) + Number(mouse.price), 
+          totalAmount: Number(laptop.price) + Number(Earphones.price), 
           status: 'Pending',
           items: {
             create: [
               { productId: laptop.id, quantity: 1 },
-              { productId: mouse.id, quantity: 1 },
+              { productId: Earphones.id, quantity: 1 },
             ],
           },
         },
