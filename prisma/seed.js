@@ -70,22 +70,30 @@ try {
   const laptop = products.find(p => p.name === 'Gaming Laptop');
   const mouse = products.find(p => p.name === 'Wireless Mouse');
 
-  for (const user of users) {
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        totalAmount: Number(laptop.price) + Number(mouse.price), 
-        status: 'Pending',
-        items: {
-          create: [
-            { productId: laptop.id, quantity: 1 },
-            { productId: mouse.id, quantity: 1 },
-          ],
+  let orderCount = 0; // Added a counter to track the actual number created
+
+    for (const user of users) {
+      // THE FIX: Skip user ID 1
+      if (user.id === 1) {
+        continue; 
+      }
+
+      await prisma.order.create({
+        data: {
+          userId: user.id,
+          totalAmount: Number(laptop.price) + Number(mouse.price), 
+          status: 'Pending',
+          items: {
+            create: [
+              { productId: laptop.id, quantity: 1 },
+              { productId: mouse.id, quantity: 1 },
+            ],
+          },
         },
-      },
-    });
-  }
-  console.log(`Created 5 Orders (1 per user)`);
+      });
+      orderCount++;
+    }
+    console.log(`Created ${orderCount} Orders (Skipped User ID 1)`);
 
   console.log('All Seed data completed successfully!');}
   else{
