@@ -27,7 +27,7 @@ app.use(express.json());
 if (process.env.NODE_ENV !== 'test') app.use(morgan('tiny'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs)); 
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });             
 app.use('/api/products', productsRoutes);
