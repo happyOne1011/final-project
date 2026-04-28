@@ -303,7 +303,7 @@ paths:
               properties:
                 name:
                   type: string
-                  example: Computers & Electronics
+                  example: Gadgets
       responses:
         '200':
           description: Category updated successfully 
