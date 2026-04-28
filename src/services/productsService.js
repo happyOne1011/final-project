@@ -21,15 +21,28 @@ export async function getProductById(id) {
 }
 
 export async function createProduct(productData) {
-  return create(productData);
+  const newProduct = await create(productData);
+  return newProduct;
 }
 
 export async function updateProduct(id, updatedData) {
-  const updatedProduct = await update(id, updatedData);
+  try{const updatedProduct = await update(id, updatedData);
   if (updatedProduct) return updatedProduct;
   else {
     const error = new Error(`Product ${id} not found`);
     error.status = 404;
+    throw error;
+  }
+}
+  catch (error) {
+    // This handles P2003 (Category not found) bubbling up from the database
+    if (error.code === 'P2003') {
+      const err = new Error(`Category ID ${updatedData.categoryId} not found`);
+      err.status = 404; 
+      throw err;
+    }
+    
+    // Always re-throw anything else!
     throw error;
   }
 }

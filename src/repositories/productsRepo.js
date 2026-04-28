@@ -10,8 +10,17 @@ export async function getById(id) {
   return products;
 }
 
-export function create(productsData) {
-  const newProduct = prisma.product.create({ data: productsData });
+export async function create(productsData) {
+  const categoryExists = await prisma.category.findUnique({
+    where: { id: productsData.categoryId }
+  });
+
+  if (!categoryExists) {
+    const error = new Error(`CategoryId ${productsData.categoryId} not found`);
+    error.status = 404;
+    throw error;
+  }
+  const newProduct = await prisma.product.create({ data: productsData });
   return newProduct;
 }
 

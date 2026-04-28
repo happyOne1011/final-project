@@ -48,7 +48,7 @@ export async function updateCategory(id, updatedData) {
     err.status =409;
     throw err;
     }
-
+throw error;
   }
 }
 
